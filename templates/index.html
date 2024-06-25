@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador</title>
+    <style>
+        body {
+            background-color: #f0f4f8; /* Fondo general más claro */
+            color: #333; /* Color de texto principal */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%; /* Ajuste del ancho del contenedor principal */
+            padding: 20px;
+            background-color: #fff; /* Fondo del contenedor principal */
+            border-radius: 8px; /* Bordes redondeados */
+            margin-top: 20px; /* Espacio superior */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+        }
+
+        .left-section {
+            width: 100%; /* Ancho del lado izquierdo */
+        }
+
+        .right-section {
+            width: 100%; /* Ancho del lado derecho */
+            margin-top: 20px; /* Espacio superior para separación */
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #007acc; /* Color azul para los encabezados */
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px; /* Altura ajustada */
+            background-color: #f5f5f5; /* Color de fondo del textarea */
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+            color: #333;
+            margin-bottom: 1rem;
+            box-sizing: border-box; /* Evitar que el padding afecte el ancho total */
+        }
+
+        input[type="submit"] {
+            background-color: #007acc; /* Azul para el botón */
+            color: white;
+            padding: 12px 24px; /* Aumento del padding */
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block; /* Mostrar como bloque para ocupar el ancho total */
+            margin: 0 auto; /* Centrado horizontal */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #005f99; /* Azul más oscuro al pasar el ratón */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff; /* Fondo blanco para la tabla */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para la tabla */
+            border-radius: 8px; /* Bordes redondeados */
+            overflow: hidden; /* Para redondear los bordes correctamente */
+            margin-top: 20px; /* Espacio superior para separación */
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007acc; /* Fondo azul para los encabezados */
+            font-weight: bold;
+            color: white;
+        }
+
+        td {
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Color de fondo para filas pares */
+        }
+
+        .AS {
+            display: flex;
+            justify-content: space-between; /* Espaciado uniforme entre los elementos */
+            margin-top: 20px;
+        }
+
+        .AS > div {
+            width: 48%; /* Ancho ajustado para ambos elementos */
+            padding: 15px;
+            background-color: #ffffff; /* Color de fondo de las secciones */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para las secciones */
+        }
+
+        .AS h2 {
+            font-size: 1.5rem; /* Tamaño de fuente aumentado */
+            color: #007acc; /* Color azul */
+            margin-bottom: 10px;
+        }
+
+        .AS pre, .AS p {
+            font-size: 1rem; /* Tamaño de fuente ajustado */
+            line-height: 1.4; /* Espaciado entre líneas */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-section">
+            <h2>Analizador</h2>
+            <form method="POST" class="mb-6">
+                <textarea name="code" rows="10">{{ request.form.code if request.method == 'POST' else '' }}</textarea>
+                <center><input type="submit" value="Analizar"></center>
+            </form>
+        </div>
+        <div class="AS">
+            <div>
+                <h2>Análisis Sintáctico</h2>
+                <pre>{{ syntax_result }}</pre>
+            </div>
+            <div>
+                <h2>Análisis Semántico</h2>
+                <p>{{ semantic_result }}</p>
+            </div>
+        </div>
+        <div class="right-section">
+            <div>
+                <h2>Análisis Léxico</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Palabra reservada</th>
+                            <th>Identificador</th>
+                            <th>Número</th>
+                            <th>Símbolo</th>
+                            <th>Paréntesis izquierdo</th>
+                            <th>Paréntesis Derecho</th>
+                            <th>Llave izquierda</th>
+                            <th>Llave Derecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for token in tokens %}
+                        <tr>
+                            <td>{{ token.value }}</td>
+                            <td>{{ 'X' if token.type in ['INT', 'RETURN'] else '' }}</td>
+                            <td>{{ 'X' if token.type == 'ID' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'NUMBER' else '' }}</td>
+                            <td>{{ 'X' if token.type in ['PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'ASSIGN', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'DOT', 'SEMICOLON', 'COMMA', 'SINGLE_QUOTE'] else '' }}</td>
+                            <td>{{ 'X' if token.type == 'LPAREN' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'RPAREN' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'LBRACE' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'RBRACE' else '' }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>TOTAL</td>
+                            <td>{{ counts.reserved }}</td>
+                            <td>{{ counts.id }}</td>
+                            <td>{{ counts.number }}</td>
+                            <td>{{ counts.symbol }}</td>
+                            <td>{{ counts.lparen }}</td>
+                            <td>{{ counts.rparen }}</td>
+                            <td>{{ counts.lbrace }}</td>
+                            <td>{{ counts.rbrace }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
